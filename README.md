@@ -1,25 +1,10 @@
 # Hi there 👋
 
-## Thanks for reading and I hope this will be help you.
+## Thanks for reading — I hope this repository will be helpful to you.
 
-## <b>What is Docker? </b>
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker)
+![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)
+![Made with ❤️](https://img.shields.io/badge/Made%20with-❤️-ff69b4?style=for-the-badge)
 
-<img src="images/docker.png"/>
-<ul>
-    <li>Docker is a containerization platform that allows you to package an application and its dependencies into a standardized unit called a container.</li>
-    <li>This container can then be run consistently across different environments, providing a predictable and isolated environment for your application to run.</li>
-</ul>
-
-```s
-./install-docker.sh
-```
-
-## <b>Docker Workflow</b>
-
-<img src="images/docker-workflow.png"/>
-
-<span>
-The Developer's code has completed some function
-then we will need to write <br>
-<b>Dockerfile → build a Docker image → run Docker containers </b>
-</span>
+A collection of real-world **Docker** and **Docker Compose** deployment templates that I’ve built and used in production and internal company environments.  
+Useful for learning, reusing, or quickly bootstrapping new services.

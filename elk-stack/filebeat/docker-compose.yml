@@ -1,0 +1,10 @@
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:9.2.2
+    container_name: filebeat
+    user: root
+    restart: always
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./data:/usr/share/filebeat/data # file registry buffer
+      - ./app/logs:/var/logs/app:ro # mount logs to read

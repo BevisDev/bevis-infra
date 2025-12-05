@@ -1,0 +1,58 @@
+# ============================== Filebeat inputs ===============================
+filebeat.inputs:
+  - type: filestream
+    id: app-log
+    enabled: true
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
+    paths:
+      - /var/logs/app/*.log
+    fields:
+      index_prefix: "job-log"
+      host.name: "host123" # hidden host
+    fields_under_root: true
+
+# local buffer tránh mất log khi Kafka down
+queue.mem:
+  events: 8192
+  flush.min_events: 512
+  flush.timeout: 5s
+
+# ============================== Filebeat modules ==============================
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+setup.template.settings:
+  index.number_of_shards: 3
+
+# ================================== Outputs ===================================
+# ELASTICSEARCH
+output.elasticsearch:
+  protocol: https
+  hosts: ["127.0.0.1:9200"]
+  ssl.certificate_authorities: ["/etc/filebeat/http_ca.crt"]
+  api_key: "${ES_API_KEY}"
+  loadbalance: true
+  worker: 2
+  bulk_max_size: 2048
+  indices:
+    - index: "%{[index_prefix]}-%{[host.name]}-%{+YYYY.MM.dd}"
+
+output.kafka:
+  enabled: true
+  hosts: ${KAFKA_BROKERS}
+  topic: "${KAFKA_TOPIC}"
+  required_acks: -1 # all replicas committed: không mất log
+  worker: 2
+
+# ================================== Logging ===================================
+logging.level: error
+logging.to_files: true
+logging.files:
+  path: /usr/share/filebeat/logs
+  name: filebeat2
+  keepfiles: 7
+  permissions: 0644
+seccomp:
+  default_action: allow
