@@ -1,0 +1,26 @@
+{
+  "name": "hdfs-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
+    "tasks.max": "3",
+    "topics.regex": ".*events$",
+    "hdfs.url": "hdfs://namenode:9000",
+    "flush.size": "5000",
+    "rotate.interval.ms": "600000",
+    "topics.dir": "/kafka-data",
+    "logs.dir": "/kafka-logs",
+    "format.class": "io.confluent.connect.hdfs.json.JsonFormat",
+    "partitioner.class": "io.confluent.connect.hdfs.partitioner.TimeBasedPartitioner",
+    "path.format": "YYYY-MM-dd/HH",
+    "partition.duration.ms": "3600000",
+    "storage.class": "io.confluent.connect.hdfs.storage.HdfsStorage",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "locale": "en_US",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "errors.tolerance": "all",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}

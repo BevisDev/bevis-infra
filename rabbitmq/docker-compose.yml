@@ -8,8 +8,10 @@ services:
       - "15672:15672" # Dashboard
     volumes:
       - ./data:/var/lib/rabbitmq
-    env_file:
-      - ./.env
+    environment:
+      # -- DEFAULT USER
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: pass123
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "status"]
       interval: 30s

@@ -21,7 +21,7 @@ swag_install:
 # @swag init --generalInfo $(MAIN) --output ./resources/swagger
 swag_gen:
 	@echo "Generating swag.."
-	@swag init --generalInfo $(MAIN)
+	@swag init -g $(MAIN)
 
 # Install DI
 di_install:

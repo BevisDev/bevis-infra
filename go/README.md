@@ -30,3 +30,5 @@ This repository provides a clean project structure, a fully optimized multi-stag
 ├── docker-compose.yml
 └── README.md
 ```
+
+---
