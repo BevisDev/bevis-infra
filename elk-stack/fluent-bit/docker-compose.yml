@@ -1,0 +1,15 @@
+networks:
+  kafka_kafka-net:
+    external: true
+
+services:
+  fluent-bit:
+    image: fluent/fluent-bit:4.2.0
+    container_name: fluent-bit
+    networks:
+      - kafka_kafka-net
+    volumes:
+      - ./fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./logs/app:/var/logs/app:ro
+      - ./logs/job:/var/logs/job:ro
+      - ./fluent-bit/buffer:/var/fluent-bit/buffer

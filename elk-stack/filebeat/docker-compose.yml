@@ -1,10 +1,17 @@
+networks:
+  kafka_kafka-net:
+    external: true
+
 services:
   filebeat:
     image: docker.elastic.co/beats/filebeat:9.2.2
     container_name: filebeat
+    networks:
+      - kafka_kafka-net
     user: root
     restart: always
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs/:/usr/share/filebeat/logs
       - ./data:/usr/share/filebeat/data # file registry buffer
       - ./app/logs:/var/logs/app:ro # mount logs to read

@@ -1,5 +1,5 @@
 networks:
-  kafka-net:
+  kafka_kafka-net:
     external: true
 
 services:
@@ -9,7 +9,7 @@ services:
     ports:
       - "8083:8083"
     networks:
-      - kafka-new_kafka-net
+      - kafka_kafka-net
     environment:
       CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
       CONNECT_REST_ADVERTISED_HOST_NAME: "connect"

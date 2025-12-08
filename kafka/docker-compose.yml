@@ -34,8 +34,12 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
 
+      # SIZE LIMIT
+      #KAFKA_MESSAGE_MAX_BYTES: 5000000
+      #KAFKA_REPLICA_FETCH_MAX_BYTES: 5000000
+      #KAFKA_FETCH_MESSAGE_MAX_BYTES: 5000000
     volumes:
       - ./data:/var/lib/kafka/data
     restart: unless-stopped

@@ -1,16 +1,29 @@
 # ============================== Filebeat inputs ===============================
 filebeat.inputs:
   - type: filestream
-    id: app-log
+    id: app1-log
     enabled: true
     json.keys_under_root: true
     json.add_error_key: true
     json.overwrite_keys: true
     paths:
-      - /var/logs/app/*.log
+      - /var/logs/app1/*.log
     fields:
-      index_prefix: "job-log"
-      host.name: "host123" # hidden host
+      index_prefix: "app1-log" # for elasticsearch
+      topic_name: "app1_topic" # use kafka
+    fields_under_root: true
+
+  - type: filestream
+    id: app2-log
+    enabled: true
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.overwrite_keys: true
+    paths:
+      - /var/logs/app2/*.log
+    fields:
+      index_prefix: "app2-log" # for elasticsearch
+      topic_name: "app2_topic" # use kafka
     fields_under_root: true
 
 # local buffer tránh mất log khi Kafka down
@@ -27,7 +40,7 @@ setup.template.settings:
   index.number_of_shards: 3
 
 # ================================== Outputs ===================================
-# ELASTICSEARCH
+# ================== ELASTICSEARCH ==================
 output.elasticsearch:
   protocol: https
   hosts: ["127.0.0.1:9200"]
@@ -37,12 +50,13 @@ output.elasticsearch:
   worker: 2
   bulk_max_size: 2048
   indices:
-    - index: "%{[index_prefix]}-%{[host.name]}-%{+YYYY.MM.dd}"
+    - index: "%{[index_prefix]}-%{+YYYY.MM.dd}"
 
+# ================== KAFKA==================
 output.kafka:
   enabled: true
-  hosts: ${KAFKA_BROKERS}
-  topic: "${KAFKA_TOPIC}"
+  hosts: ["kafka:29092"]
+  topic: "%{[topic_name]}"
   required_acks: -1 # all replicas committed: không mất log
   worker: 2
 
