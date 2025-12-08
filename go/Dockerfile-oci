@@ -11,8 +11,9 @@ RUN apt-get update && \
 
 WORKDIR /build
 
+# download instantclient https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
 # Copy instantclient-basic-linux.x64 into container
-COPY ./src/resources/oracle /oracle/
+COPY ./resources/oracle /oracle/
 
 # Unzip lib oracle
 RUN unzip /oracle/instantclient-basic-linux*.zip -d /oracle && \
@@ -30,9 +31,11 @@ RUN go mod download
 COPY . .
 
 # Using make file to install
-RUN make swag_install && \
-    make swag_gen && \
-    make build
+# Dev should run swag for latest
+# RUN make swag_install && \
+#     make swag_gen && \
+#     make build
+RUN make build
 
 # Stage 2: run app
 FROM ubuntu:22.04
@@ -66,7 +69,9 @@ ENV LD_LIBRARY_PATH=/oracle/instantclient_12_2 \
     CGO_ENABLED=1
 
 # Copy source app
-COPY --from=builder /build/src/resources ./src/resources
+COPY --from=builder /build/resources/sql ./resources/sql
+COPY --from=builder /build/resources/prod.yml ./resources/prod.yml
+COPY --from=builder /build/resources/prod-job.yml ./resources/prod-job.yml
 COPY --from=builder /build/gobe ./
 
 ENTRYPOINT [ "./gobe" ]
