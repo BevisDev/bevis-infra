@@ -32,9 +32,23 @@ services:
 
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
 
+      # =============== LOGGING =================
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CONNECT_LOG4J_LOGGERS: >
+        org.apache.kafka.connect.runtime.Worker=INFO,
+        org.apache.kafka.connect.runtime.WorkerSinkTask=INFO,
+        org.apache.kafka.connect.runtime.distributed.DistributedHerder=INFO,
+        io.confluent.connect.hdfs=INFO
+      CONNECT_LOG4J_TOOLS_LOGLEVEL: ERROR
+      
       # HDFS
       CONNECT_HDFS_URL: "hdfs://namenode:9000"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
     volumes:
       # download plugins and mount to container
       # Read more: README
