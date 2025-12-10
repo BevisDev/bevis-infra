@@ -40,9 +40,9 @@ services:
         org.apache.kafka.connect.runtime.distributed.DistributedHerder=INFO,
         io.confluent.connect.hdfs=INFO
       CONNECT_LOG4J_TOOLS_LOGLEVEL: ERROR
-      
-      # HDFS
-      CONNECT_HDFS_URL: "hdfs://namenode:9000"
+
+      # HDFS for authenticate kerberos
+      # KAFKA_OPTS: "-Djava.security.krb5.conf=/etc/kafka/kerberos/krb5.conf"
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -53,3 +53,6 @@ services:
       # download plugins and mount to container
       # Read more: README
       - ../plugins:/usr/share/confluent-hub-components
+      # for authenticate kerberos
+      # === include: krb5.conf and key.keytab
+      # - ../kerberos:/etc/kafka/kerberos

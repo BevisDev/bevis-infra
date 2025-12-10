@@ -98,6 +98,12 @@ These APIs are essential for operating Kafka Connect in production.
 
 ---
 
+## 📥 GET – Check heal
+
+```bash
+curl -s http://localhost:8083/connectors/hdfs-sink/status | jq
+```
+
 ## 📥 GET – Retrieve Connector Configuration
 
 Use this to view the current configuration of a connector.

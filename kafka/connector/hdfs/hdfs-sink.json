@@ -22,5 +22,8 @@
     "errors.tolerance": "all",
     "errors.log.enable": "true",
     "errors.log.include.messages": "true"
+    // "hdfs.authentication.kerberos": "true",
+    // "connect.hdfs.principal": "user@COMPANY.VN",
+    // "connect.hdfs.keytab": "/etc/kafka/kerberos/key.keytab"
   }
 }
