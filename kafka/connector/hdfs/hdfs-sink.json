@@ -1,12 +1,13 @@
 {
   "name": "hdfs-sink",
   "config": {
-    "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
     "tasks.max": "3",
+    "flush.size": "5000", //  = message kafka
+    "rotate.interval.ms": "600000", // msg đầu tiên ghi vào => 10phút sẽ đóng file lại
+    "rotate.schedule.interval.ms": "900000", // 30p sẽ force đóng lại file
     "topics.regex": ".*events$",
+    "connector.class": "io.confluent.connect.hdfs.HdfsSinkConnector",
     "hdfs.url": "hdfs://namenode:9000",
-    "flush.size": "5000",
-    "rotate.interval.ms": "600000",
     "topics.dir": "/kafka-data",
     "logs.dir": "/kafka-logs",
     "format.class": "io.confluent.connect.hdfs.json.JsonFormat",
