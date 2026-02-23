@@ -1,34 +1,42 @@
-# Stage 1: build app
-FROM golang:1.23.4 AS builder
+# Stage 1: Build Oracle
+FROM debian:bookworm-slim AS oracle
 
-# Install lib
-RUN apt-get update && \
-    apt install -y --no-install-recommends \
-    libaio1 \
-    make \
-    unzip && \ 
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 # download instantclient https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
 # Copy instantclient-basic-linux.x64 into container
-COPY ./resources/oracle /oracle/
+COPY ./src/resources/oracle/instantclient-basic-linux*.zip /tmp/
 
-# Unzip lib oracle
-RUN unzip /oracle/instantclient-basic-linux*.zip -d /oracle && \
-    rm /oracle/instantclient-basic-linux*.zip
+RUN unzip /tmp/instantclient-basic-linux*.zip -d /opt \
+    && rm /tmp/instantclient-basic-linux*.zip \
+    && mv /opt/instantclient_* /opt/instantclient
 
-# Set environment for running oracle
-ENV LD_LIBRARY_PATH=/oracle/instantclient_12_2 \
-    ORACLE_HOME=/oracle/instantclient_12_2 \
-    CGO_ENABLED=1
+# Stage 2: Build App
+FROM golang:1.25.5 AS builder
 
-# Copy pkg app and download
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    make \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=oracle /opt/instantclient /opt/instantclient
+
+ENV LD_LIBRARY_PATH=/opt/instantclient
+
+WORKDIR /app
+
 COPY go.mod go.sum ./
+
 RUN go mod download
 
 COPY . .
+
+ENV CGO_ENABLED=1 \
+    GOOS=linux \
+    GOARCH=amd64
 
 # Using make file to install
 # Dev should run swag for latest
@@ -37,8 +45,8 @@ COPY . .
 #     make build
 RUN make build
 
-# Stage 2: run app
-FROM ubuntu:22.04
+# Stage 3: Run App
+FROM debian:bookworm-slim
 
 # Run non-interactive
 ARG DEBIAN_FRONTEND=noninteractive
@@ -47,31 +55,28 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Ho_Chi_Minh
 
 # Install Lib oracle and Timezone
-RUN apt-get update && \
-    apt install -y --no-install-recommends \
-    ca-certificates \
-    curl \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libaio1 \
-    tzdata && \
-    echo "$TZ" > /etc/timezone && \
-    ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    rm -rf /var/lib/apt/lists/*
+    tzdata  \
+    curl \
+    && echo "$TZ" > /etc/timezone  \
+    && ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy lib oracle was install in builder
-COPY --from=builder /oracle /oracle
+# Copy lib oracle was install in oracle
+COPY --from=oracle /opt/instantclient /opt/instantclient
 
 WORKDIR /app
 
 # Set env oracle
-ENV LD_LIBRARY_PATH=/oracle/instantclient_12_2 \
-    ORACLE_HOME=/oracle/instantclient_12_2 \
-    CGO_ENABLED=1
+ENV LD_LIBRARY_PATH=/opt/instantclient \
+    ORACLE_HOME=/opt/instantclient
 
 # Copy source app
-COPY --from=builder /build/resources/sql ./resources/sql
-COPY --from=builder /build/resources/prod.yml ./resources/prod.yml
-COPY --from=builder /build/resources/prod-job.yml ./resources/prod-job.yml
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /build/migrations ./migrations
+COPY --from=builder /build/config/prod.yml ./config/prod.yml
 COPY --from=builder /build/gobe ./
 
 ENTRYPOINT [ "./gobe" ]
