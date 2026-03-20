@@ -1,0 +1,19 @@
+# build from oracle package
+FROM bevisdev/oracle:12.2 AS oracle
+
+FROM debian:bookworm-slim
+
+ENV TZ=Asia/Ho_Chi_Minh
+
+RUN apt-get update  \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      libaio1 \
+      curl \
+      ca-certificates \
+    && ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime \
+    && echo "$TZ" > /etc/timezone  \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=oracle /opt/oracle /opt/oracle
+
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
