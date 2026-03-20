@@ -1,0 +1,12 @@
+FROM oracle:12.2 AS oracle
+
+FROM golang:1.25.5-bookworm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    make \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=oracle /opt/oracle /opt/oracle
+
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
