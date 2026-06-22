@@ -70,10 +70,11 @@ cruiseControl:
   enabled: false
 
 # kafka controller definitions
+# https://strimzi.io/docs/operators/latest/configuring.html#type-KafkaNodePool-reference
 controllers:
   replicas: 3
   storage:
-    type: persistent-claim
+    type: PersistentClaimStorage
     size: 20Gi
     class: longhorn
     deleteClaim: false
@@ -89,6 +90,7 @@ controllers:
     -Xmx: 1g
 
 # kafka brokers definitions
+# https://strimzi.io/docs/operators/latest/configuring.html#type-KafkaNodePool-reference
 brokers:
   replicas: 3
   storage:

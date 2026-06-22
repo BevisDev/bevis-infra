@@ -11,7 +11,7 @@ metadata:
 spec:
   replicas: {{ required (printf "%s.replicas is required" $name) $cfg.replicas }}
   roles:
-    - brokers
+    - broker
   storage:
     type: {{ $cfg.storage.type }}
     {{- if eq $cfg.storage.type "persistent-claim" }}

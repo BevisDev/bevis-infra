@@ -2,6 +2,9 @@
 
 Helm chart deploy **Kafka cluster** (KRaft, 3 controllers + 3 brokers).
 
+# Note
+ - 045-Crd-kafkanodepool.yaml: chỉ có 2 role: (controller | broker)
+
 ## Kiến trúc
 
 ```text
@@ -49,3 +52,4 @@ Argo CD: app `kafka` trong `dp-ops` → namespace `kafka`, `values.yaml`.
 
 - [Strimzi Kafka CR](https://strimzi.io/docs/operators/latest/configuring.html#type-Kafka-reference)
 - [KafkaNodePool](https://strimzi.io/docs/operators/latest/configuring.html#type-KafkaNodePool-reference)
+- [Apache Kafka](https://kafka.apache.org/43/configuration/broker-configs/)

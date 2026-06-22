@@ -1,0 +1,36 @@
+{{- range .Values.applications }}
+{{- if ne .enabled false }}
+{{- $dest := .destination | default dict }}
+{{- $sync := .syncPolicy | default $.Values.defaults.syncPolicy }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: argocd
+  {{- if .finalizer }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  {{- end }}
+spec:
+  project: {{ .project | default $.Values.defaults.project }}
+  destination:
+    server: {{ $dest.server | default $.Values.defaults.destination.server }}
+    namespace: {{ .namespace }}
+  source:
+    repoURL: {{ required "repoURL is required" .repoURL }}
+    targetRevision: {{ .targetRevision | default $.Values.defaults.targetRevision }}
+    {{- if .helm }}
+    path: {{ .path | default "." }}
+    helm:
+      releaseName: {{ .helm.releaseName | default .name }}
+      valueFiles: {{ .helm.valueFiles | toYaml | nindent 8 }}
+    {{- else if .directory }}
+    path: {{ .directory.path }}
+    directory:
+      recurse: {{ .directory.recurse | default false }}
+    {{- end }}
+  syncPolicy:
+    {{- toYaml $sync | nindent 4 }}
+{{- end }}
+{{- end }}

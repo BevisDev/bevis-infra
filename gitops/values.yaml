@@ -1,0 +1,23 @@
+# default variables
+defaults: 
+  project: default
+  targetRevision: master
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
+    syncOptions:
+      - ServerSideApply=true
+
+# resources k8s applications
+applications:
+  - name: example-app
+    enabled: true
+    namespace: default
+    repoURL: git-repoUrl
+    helm:
+      valueFiles:
+        - values.yaml

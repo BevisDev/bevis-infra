@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: master
+  namespace: argocd
+spec:
+  project: data-platform
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: git@gitlab.vietcredit.com.vn:data-ops/dp-ops.git
+    targetRevision: master
+    path: .
+    helm:
+      valueFiles:
+        - values.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      enabled: true
