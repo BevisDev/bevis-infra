@@ -9,7 +9,7 @@ Expand the name of the chart.
 Kafka cluster name used by Strimzi CRs and bootstrap service.
 */}}
 {{- define "kafka.clusterName" -}}
-{{- .Values.clusterName | required "clusterName is required" -}}
+{{- default .Chart.Name .Values.clusterName | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

@@ -6,9 +6,9 @@
 apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:
-  name: {{ include "kafka.clusterName" . }}
+  name: {{ include "kafka.clusterName" $root }}
   labels:
-    {{- include "kafka.labels" . | nindent 4 }}
+    {{- include "kafka.labels" $root | nindent 4 }}
   {{- with .metadata.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
