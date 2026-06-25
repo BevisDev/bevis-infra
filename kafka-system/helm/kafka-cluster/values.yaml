@@ -190,7 +190,8 @@ users:
       # supported: tls | scram-sha-512 | tls-external                        - 
       type: scram-sha-512
 
-  - name: user
+  # user for Kafka-UI
+  - name: ui
     authentication:
       type: scram-sha-512
     authorization:
@@ -205,19 +206,42 @@ users:
       # type: [allow, deny] default: allow
       # operations: Read, Write, Create, Delete, Alter, Describe, ClusterAction, AlterConfigs, DescribeConfigs, IdempotentWrite and All.
       acls:
+        # --- Cluster metadata & config ---
+        - resource:
+            type: cluster
+          operations:
+            - Describe
+            - DescribeConfigs
+            - Alter
+            - AlterConfigs
+            - Create          # create topic
+            - IdempotentWrite # pub message
+          host: "*"
+        
+        # --- Topics: full admin UI ---
         - resource:
             type: topic
-            name: airflow-
-            patternType: prefix
-          type: allow
-          operations: 
+            name: "*"
+            patternType: literal
+          operations:
             - Read
             - Write
+            - Create
+            - Delete
+            - Alter
             - Describe
+            - DescribeConfigs
+            - AlterConfigs
+          host: "*"
+          
+        # --- Consumer groups ---
         - resource:
             type: group
-            name: airflow-
-            patternType: prefix
-          type: allow
-          operations: 
+            name: "*"
+            patternType: literal
+          operations:
             - Read
+            - Describe
+            - Delete
+            - Alter  # reset offset
+          host: "*"

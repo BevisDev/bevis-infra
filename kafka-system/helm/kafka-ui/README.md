@@ -9,8 +9,9 @@ azure:
     
 ## Document
 
+[Kafka Official](https://ui.docs.kafbat.io/)
+[Kafbat-UI GitHub](https://github.com/kafbat/kafka-ui)
 [Auth Kafka](https://ui.docs.kafbat.io/configuration/authentication/for-kafka/sasl_scram)
 [Oauth2](https://ui.docs.kafbat.io/configuration/authentication/for-the-ui/oauth2)
 [Rbac](https://ui.docs.kafbat.io/configuration/rbac-role-based-access-control)
-[Kafbat-UI GitHub](https://github.com/kafbat/kafka-ui)
-[Kafka Official](https://ui.docs.kafbat.io/)
+[Config](https://ui.docs.kafbat.io/configuration/misc-configuration-properties)

@@ -38,41 +38,52 @@ existingConfigMap: ""
 yamlApplicationConfig:
   kafka:
     clusters:
-      - name: kafka-cluster
-        bootstrapServers: "kafka-cluster-kafka-bootstrap:9092"
+      - name: dp-kafka
+        bootstrapServers: dp-kafka-kafka-bootstrap:9092
+        disableLogDirsCollection: true
+        ssl:
+          truststore-location: /etc/kafka/ca/ca.p12
+          truststore-type: PKCS12
+          truststore-password: ${UI_KAFKA_TRUSTSTORE_PASSWORD}  
+          verify-ssl: true
         properties:
           security.protocol: SASL_SSL
           sasl.mechanism: SCRAM-SHA-512
-        # schemaRegistry: http://axons-schema-registry.axons-schema-registry:8081
-        # schemaRegistryShowNullValues: false
-        # schemaRegistryUseFullyQualifiedNames: false
-        # schemaRegistryAuth:
-          # oauth:
-            # tokenCacheEnabled: true
-            # tokenRefreshBuffer: 60s
+          sasl.jaas.config: "${UI_KAFKA_SASL_JAAS_CONFIG}"
+      
+    # Timeout for admin Kafka operations (in milliseconds)
+    admin-client-timeout: 30000
+
+    # Polling behavior for consumer previews in the UI
+    polling:
+      poll-timeout-ms: 1000  # How long to wait for new records (ms)
+      max-page-size: 500  # Maximum number of records per poll
+      default-page-size: 100  # Default number of records per poll
+
   auth:
     type: OAUTH2
     oauth2:
       client:
         azure:
           scope: openid,profile,email
-          client-name: "Sign in with Microsoft"
+          client-name: "Microsoft" # display name Org
           provider: azure
           redirect-uri: "https://kafka-ui.com.vn/login/oauth2/code/azure"
           authorization-grant-type: authorization_code
-          user-name-attribute: preferred_username
+          user-name-attribute: email
           custom-params:
             type: oauth
             roles-field: roles
   rbac:
     roles:
+      # Admin: user có Azure App Role "kafka_admin"
       - name: "admin"
         clusters:
-          - '.*'
+          - kafka-cluster
         subjects:
           - provider: oauth
             type: role
-            value: "kafka_admin" 
+            value: "kafka_admin"
         permissions:
           - resource: applicationconfig
             actions: all
@@ -95,10 +106,10 @@ yamlApplicationConfig:
           - resource: acl
             actions: all
 
-      # Viewer: user có Azure App Role "kafbat-viewer"
-      - name: "viewers"
+      # Viewer: user có Azure App Role "kafka_viewer"
+      - name: "viewer"
         clusters:
-          - ".*"
+          - kafka-cluster
         subjects:
           - provider: oauth
             type: role
@@ -122,16 +133,19 @@ yamlApplicationConfig:
     #     - resource: clusterconfig
     #       actions: [view]
 
+  # ======================================================
+  # Application Logging Configuration
+  # Configure logging levels for specific packages.
+  # ======================================================
+  logging:
+    level:
+      root: INFO
+      io.kafbat.ui: INFO
+
 ## @param yamlApplicationConfigConfigMap Map with name and keyName keys, name refers to the existing ConfigMap, keyName refers to the ConfigMap key with Kafbat-UI config in Yaml format
-yamlApplicationConfigConfigMap:
-  {}
-  # keyName: config.yml
-  # name: configMapName
+yamlApplicationConfigConfigMap: {}
 ## @param yamlApplicationConfigSecret Secret with name and keyName keys, name refers to the existing ConfigMap, keyName refers to the ConfigMap key with Kafbat-UI config in Yaml format
-yamlApplicationConfigSecret:
-  {}
-  # keyName: config.yml
-  # name: secretName
+yamlApplicationConfigSecret: {}
 ## @param existingSecret Name of the existing Secret with Kafbat-UI environment variables
 existingSecret: ""
 ### @section Environment variables from
@@ -142,6 +156,25 @@ envs:
   config: {}
   ## @param envs.secretMappings The mapping of existing secret to env variable.
   secretMappings:
+    # KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_OAUTH_CLIENTID:
+    #   name: azure-secrets
+    #   keyName: client-id
+    # KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_OAUTH_CLIENTSECRET:
+    #   name: azure-secrets
+    #   keyName: client-secret
+    # KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_OAUTH_SCOPES:
+    #   name: azure-secrets
+    #   keyName: scopes
+    # KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_OAUTH_TOKENURL:
+    #   name: azure-secrets
+    #   keyName: token-url
+    UI_KAFKA_SASL_JAAS_CONFIG:
+      name: ui
+      keyName: sasl.jaas.config
+    UI_KAFKA_TRUSTSTORE_PASSWORD:
+      name: dp-kafka-cluster-ca-cert
+      keyName: ca.password
+    
     AUTH_OAUTH2_CLIENT_AZURE_CLIENTID:
       name: oidc-azure
       keyName: client-id
@@ -151,26 +184,14 @@ envs:
     AUTH_OAUTH2_CLIENT_AZURE_ISSUERURI:
       name: oidc-azure
       keyName: issuer
-    KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG:
-      name: ui
-      keyName: sasl.jaas.config
-    KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD:
-      name: kafka-cluster-ca-cert
-      keyName: ca.password
+
   ## @param envs.configMappings  The mapping of configmap and keyName to get env variable.
   configMappings: {}
-    #ENV_NAME:
-    #  name: kubernetes-configmap-name
-    #  keyName: kubernetes-configmap-key
 ## @param env [object] Envs to be added to the Kafka-UI container
-env: {}
+env:
+  - name: JAVA_OPTS
+    value: "-XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
   # - name: DYNAMIC_CONFIG_ENABLED
-  #   value: "true"
-  # - name: KAFKA_CLUSTERS_0_NAME
-  #   value: kafka-core
-  # - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-  #   value: "{{ .Release.Name }}-kafka-core.{{ .Release.Namespace }}.svc.cluster.local:9092"
-  # - name: KAFKA_CLUSTERS_0_READONLY
   #   value: "true"
   # - name: KAFKA_CLUSTERS_0_SCHEMAREGISTRY
     # value: http://axons-schema-registry.axons-schema-registry:8081
@@ -187,11 +208,11 @@ env: {}
 ## @param resources Set Kafka-UI container requests and limits for different resources like CPU or memory (essential for production workloads)
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 1
+    memory: 1Gi
   requests:
     cpu: 200m
-    memory: 256Mi
+    memory: 512Mi
 
 ## @param initContainers Add additional init containers to the Kafka-UI pods
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -199,9 +220,17 @@ resources:
 initContainers: {}
 
 ## @param volumeMounts [object] Optionally specify additional volumeMounts for the kafka-UI container
-volumeMounts: {}
+volumeMounts:
+  - name: kafka-cluster-ca
+    mountPath: /etc/kafka/ca
+    readOnly: true
+
 ## @param volumes [object] Optionally specify additional volumes for the Kafka-UI pods
-volumes: {}
+volumes: 
+  - name: kafka-cluster-ca
+    secret: 
+      secretName: dp-kafka-cluster-ca-cert
+
 ## @param hostAliases [object] Kafka-UI pods host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
 ##
@@ -209,21 +238,7 @@ hostAliases: {}
 
 ## @param extraContainers Specify additional containers in extraContainers.
 ## For example, to add an authentication proxy to a kafka-ui pod.
-extraContainers: |
-# - name: proxy
-#   image: quay.io/gambol99/keycloak-proxy:latest
-#   args:
-#   - -provider=github
-#   - -client-id=
-#   - -client-secret=
-#   - -github-org=<ORG_NAME>
-#   - -email-domain=*
-#   - -cookie-secret=
-#   - -http-address=http://0.0.0.0:4181
-#   - -upstream-url=http://127.0.0.1:3000
-#   ports:
-#     - name: proxy-web
-#       containerPort: 4181
+extraContainers: ~
 
 ## @section Network Policies
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
