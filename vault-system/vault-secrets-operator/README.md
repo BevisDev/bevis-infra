@@ -1,7 +1,9 @@
 # Vault Secrets Operator
 
+- version: 1.4.0
+
 ## Document
 
-- [Chart](https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator)
+- [Helm Chart](https://artifacthub.io/packages/helm/hashicorp/vault-secrets-operator)
 - [Vault Secrets Operator](https://developer.hashicorp.com/vault/docs/platform/k8s/vso)
 - [Repository vault-secrets-operator](https://github.com/hashicorp/vault-secrets-operator)

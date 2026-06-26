@@ -7,5 +7,5 @@
 
 ## Document
 
-- [Chart](https://artifacthub.io/packages/helm/hashicorp/vault)
-- [Doc](https://developer.hashicorp.com/vault)
+- [Helm Chart](https://artifacthub.io/packages/helm/hashicorp/vault)
+- [Document](https://developer.hashicorp.com/vault)
