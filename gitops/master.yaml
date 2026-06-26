@@ -4,12 +4,12 @@ metadata:
   name: master
   namespace: argocd
 spec:
-  project: data-platform
+  project: default
   destination:
     namespace: argocd
     server: https://kubernetes.default.svc
   source:
-    repoURL: git@gitlab.vietcredit.com.vn:data-ops/dp-ops.git
+    repoURL: git@url
     targetRevision: master
     path: .
     helm:

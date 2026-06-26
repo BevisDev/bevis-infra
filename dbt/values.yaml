@@ -1,0 +1,54 @@
+# Override the name of the chart with the release name.
+nameOverride: ""
+
+# Override the name or fullname of the chart.
+fullnameOverride: ""
+
+# Set to true to create RBAC Role and RoleBinding for Airflow KubernetesPodOperator to launch dbt task pods.
+rbac:
+  create: true
+  subjects:
+    - kind: ServiceAccount
+      name: airflow3-worker
+      namespace: airflow3
+
+# ConfigMap and Secret definitions for dbt profiles and credentials. The Role allows get access to these resources for mounting in pod specs.
+configs:
+  cm:
+    # Set to true to create ConfigMaps for dbt profiles.
+    create: false
+
+    annotations: {}
+
+# ServiceAccount for dbt pods.
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+  # Annotations to add to the service account.
+  annotations: {}
+
+imagePullSecrets:
+  - dockerhub-regcred
+
+cleanup:
+  enabled: true
+  schedule: "0 2 * * 0"
+  image: bitnami/kubectl:1.30.2
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  phases:
+    - Failed
+    - Succeeded
+    - Unknown
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

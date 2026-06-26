@@ -1,1 +1,190 @@
-resources: []
+# Reference if vault auth global has created
+vaultAuthGlobalRef:
+  enabled: true
+  name: default
+  namespace: vault
+
+# Defaults applied to all staticSecrets unless overridden per entry.
+defaults:
+  vaultAuthRef: vault-auth
+  type: kv-v2
+  mount: secret
+  refreshAfter: 5m
+  vaultAuthGlobalRef:
+    name: default
+    namespace: vault
+
+# Creates vault-sa ServiceAccount and vault-auth VaultAuth per namespace.
+# Add a namespace here before defining staticSecrets in that namespace.
+vaultAuthNamespaces:
+  - namespace: gitlab
+    enabled: true
+    kubernetes:
+      role: readonly
+
+  - namespace: airflow3
+    enabled: true
+    kubernetes:
+      role: readonly
+
+  - namespace: kafka
+    enabled: true
+    kubernetes:
+      role: readonly
+
+# VaultStaticSecret definitions synced from Vault KV to Kubernetes Secrets.
+staticSecrets: 
+# ===========================
+# ======== GITLAB ==========
+# ===========================
+  - name: dockerhub-regcred
+    namespace: gitlab-runner
+    enabled: true
+    path: dockerhub
+    transformation: dockerconfigjson
+    destination:
+      type: kubernetes.io/dockerconfigjson
+    
+  - name: git-ssh
+    namespace: gitlab-runner
+    enabled: true
+    path: git-ssh
+
+# ===========================
+# ==== AIRFLOW 3 ========
+# ===========================
+  - name: dockerhub-regcred
+    namespace: airflow3
+    enabled: true
+    path: dockerhub
+    transformation: dockerconfigjson
+    destination:
+      type: kubernetes.io/dockerconfigjson
+
+  - name: airflow-fernet-key
+    namespace: airflow3
+    enabled: true
+    path: airflow3
+    destination:
+      transformation:
+        excludeRaw: true
+        includes: 
+          - "^fernet-key$"
+
+  - name: airflow-api-secret-key
+    namespace: airflow3
+    enabled: true
+    path: airflow3
+    destination:
+      transformation:
+        excludeRaw: true
+        includes: 
+          - "^api-secret-key$"
+
+  - name: airflow-jwt-secret
+    namespace: airflow3
+    enabled: true
+    path: airflow3
+    destination:
+      transformation:
+        excludeRaw: true
+        includes: 
+          - "^jwt-secret$"
+
+  - name: airflow-metadata-secret
+    namespace: airflow3
+    enabled: true
+    path: airflow3
+    destination:
+      transformation:
+        excludeRaw: true
+        excludes: 
+          - .*
+        templates:
+          connection: 
+            text: '{{ get .Secrets "metadata-conn" }}'
+
+  - name: airflow-azure-oidc
+    namespace: airflow3
+    enabled: true
+    path: oidc-azure
+    destination:
+      transformation:
+        excludeRaw: true
+        includes: 
+          - "^client-id$"
+          - "^client-secret$"
+          - "^tenant-id$"
+
+  - name: airflow-minio-conn
+    namespace: airflow3
+    enabled: true
+    path: minio
+    transformation: minioconn
+
+# ===========================
+# ========= KAFKA ==========
+# ===========================
+  - name: dockerhub-regcred
+    namespace: kafka
+    enabled: true
+    path: dockerhub
+    transformation: dockerconfigjson
+    destination:
+      type: kubernetes.io/dockerconfigjson
+  
+  - name: oidc-azure
+    namespace: kafka
+    enabled: true
+    path: oidc-azure
+
+  - name: dockerhub-regcred
+    namespace: kafka-connect
+    enabled: true
+    path: dockerhub
+    transformation: dockerconfigjson
+    destination:
+      type: kubernetes.io/dockerconfigjson
+
+# ===========================
+# ========= STRIMZI ==========
+# ===========================
+  - name: dockerhub-regcred
+    namespace: strimzi
+    enabled: true
+    path: dockerhub
+    transformation: dockerconfigjson
+    destination:
+      type: kubernetes.io/dockerconfigjson
+
+
+
+
+
+# Preset transformations for VaultStaticSecret.destination.transformation
+transformations:
+  minioconn:
+    excludeRaw: true
+    excludes:
+      - .*
+    templates:
+      "connection":
+        text: |
+          {{- $endpoint := get .Secrets "endpoint" | urlquery -}}
+          {{- $accessKey := get .Secrets "access-key" -}}
+          {{- $secretKey := get .Secrets "secret-key" -}}
+          {{- printf "aws://%s:%s@/?endpoint_url=%s" $accessKey $secretKey $endpoint -}}
+
+  dockerconfigjson:
+    excludeRaw: true
+    excludes:
+      - .*
+    templates:
+      ".dockerconfigjson":
+        text: |
+          {{- $registry := get .Secrets "registry" -}}
+          {{- $username := get .Secrets "username" -}}
+          {{- $password := get .Secrets "password" -}}
+          {{- $email := get .Secrets "email" -}}
+          {{- $auth := printf "%s:%s" $username $password | b64enc -}}
+          {{- dict "auths" (dict $registry (dict "username" $username "password" $password "email" $email "auth" $auth)) | mustToJson -}}

@@ -1,0 +1,50 @@
+{{- if .Values.cleanup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-cronjob
+  namespace: {{ include "dbt.namespace" . }}
+  labels:
+    {{- include "dbt.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pod-cleanup
+spec:
+  schedule: {{ .Values.cleanup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.cleanup.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ .Values.cleanup.failedJobsHistoryLimit | default 3 }}
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            {{- include "dbt.labels" . | nindent 12 }}
+            app.kubernetes.io/component: pod-cleanup
+        spec:
+          serviceAccountName: cleanup-sa
+          restartPolicy: Never
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- range . }}
+            - name: {{ . }}
+            {{- end }}
+          {{- end }}
+          containers:
+            - name: cleanup
+              image: {{ .Values.cleanup.image }}
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -e
+                  NS="{{ include "dbt.cleanup.namespace" . }}"
+                  echo "Cleaning terminal pods in namespace: ${NS}"
+                  {{- range .Values.cleanup.phases }}
+                  kubectl delete pods -n "${NS}" \
+                    --field-selector="status.phase={{ . }}" \
+                    --ignore-not-found=true
+                  {{- end }}
+                  echo "Done."
+              resources:
+                {{- toYaml .Values.cleanup.resources | nindent 16 }}
+{{- end }}

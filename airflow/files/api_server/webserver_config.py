@@ -37,7 +37,7 @@ AZ_TENANT_ID = os.environ["AZ_TENANT_ID"]
 AZ_CLIENT_ID = os.environ["AZ_CLIENT_ID"]
 AZ_CLIENT_SECRET = os.environ["AZ_CLIENT_SECRET"]
 
-APP_NAME = "VietCredit Data Platform"
+APP_NAME = "Bevis Data Platform"
 
 OAUTH_PROVIDERS = [
     {
@@ -260,7 +260,7 @@ class AzureSecurityManager(FabAirflowSecurityManagerOverride):
                 username=username,
                 first_name=userinfo.get("first_name", ""),
                 last_name=userinfo.get("last_name", ""),
-                email=userinfo.get("email", "") or f"{username}@vietcredit.com.vn",
+                email=userinfo.get("email", "") or f"{username}@notfound.com.vn",
                 role=self._oauth_calculate_user_roles(userinfo),
             )
             log.debug(">>>> New user registered: %s", user)

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: dbt
+description: dbt models chart
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - dbt
+  - kubernetes

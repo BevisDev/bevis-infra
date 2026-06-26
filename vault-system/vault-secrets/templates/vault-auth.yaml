@@ -1,0 +1,25 @@
+{{- range .Values.vaultAuthNamespaces }}
+{{- if ne .enabled false }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-sa
+  namespace: {{ .namespace }}
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-auth
+  namespace: {{ .namespace }}
+spec:
+  kubernetes:
+    role: {{ .kubernetes.role }}
+    serviceAccount: {{ .serviceAccount | default "vault-sa" }}
+  {{- if $.Values.vaultAuthGlobalRef.enabled }}
+  vaultAuthGlobalRef:
+    name: {{ $.Values.vaultAuthGlobalRef.name }}
+    namespace: {{ $.Values.vaultAuthGlobalRef.namespace }}
+  {{- end }}
+{{- end }}
+{{- end }}
