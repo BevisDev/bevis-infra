@@ -1,7 +1,7 @@
 # Apache Airflow
 
 - version: airflow 3.2.2
-- image: 
+- redirect_uri: https://domain/auth/oauth-authorized/azure
 
 ## 1. Docker Images
 
