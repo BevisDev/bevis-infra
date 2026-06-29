@@ -1,0 +1,19 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: apicurio-registry-operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/instance: apicurio-registry-operator
+    app.kubernetes.io/name: apicurio-registry-operator
+    app.kubernetes.io/part-of: apicurio-registry
+    app.kubernetes.io/version: 3.3.0
+  name: apicurio-registry-operator-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: apicurio-registry-operator-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: apicurio-registry-operator
+  namespace: {{ .Release.Namespace }}

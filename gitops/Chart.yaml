@@ -4,3 +4,7 @@ description: Manifest Argo resources
 type: application
 version: 0.1.0
 appVersion: "3.4.2"
+maintainers:
+  - name: Truong Thanh Binh
+    email: dev.binhtt@gmail.com
+    url: https://github.com/BevisDev

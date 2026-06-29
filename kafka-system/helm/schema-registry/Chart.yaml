@@ -1,14 +1,12 @@
 apiVersion: v2
-name: kafka
-description: Kafka Cluster k8s
-type: application
-version: 0.1.0
-appVersion: "4.2.0"
+appVersion: 3.3.0
+description: 'custom apicurio registry chart'
 keywords:
-  - kafka
-  - cdc
-  - strimzi
+- apicurio
+- schema-registry
 maintainers:
   - name: Truong Thanh Binh
     email: dev.binhtt@gmail.com
     url: https://github.com/BevisDev
+name: schema-registry
+version: 0.1.0
