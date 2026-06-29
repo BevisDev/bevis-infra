@@ -49,7 +49,6 @@ spec:
   selector:
     matchLabels:
       app: {{ include "gitlab-runner.fullname" . | quote }}
-      chart: {{ include "gitlab-runner.chart" . | quote }}
       release: {{ .Release.Name | quote }}
       heritage: {{ .Release.Service | quote }}
 {{- end }}

@@ -1,39 +1,11 @@
-# Gitlab-runner (Helm)
+# Gitlab Runner
 
-This repository uses helm-chart
+- version: 0.90.1
 
-images should be pull from dockerhub official and push to your private docker registry
-we just change images below
+## Images
 
---- `runner`
+1. registry.gitlab.com/gitlab-org/gitlab-runner:alpine-v19.1.1
 
-```yaml`
-image:
-  registry: dockerhub.example.com.vn
-  image: gitlab/gitlab-runner
-  tag: alpine3.21-36b1f255
-```
+## Document
 
---- `job`
-
-```yaml
-runners:
-  config: |
-    [[runners]]
-      [runners.kubernetes]
-        image = "dockerhub.company.com.vn/alpine:3.23"
-        image_pull_secrets = ["dockerhub-secret"]
-        pull_policy = "if-not-present"
-```
-
-## Install helm repository
-
-at `cicd` root folder
-
-```sh
-
-helm upgrade --install argocd infras/gitlab-runner \
-  -n gitlab-runner \
-  --create-namespace \
-  -f infras/gitlab-runner/values-prod.yaml
-```
+[Helm Chart](https://docs.gitlab.com/runner/install/kubernetes/)
