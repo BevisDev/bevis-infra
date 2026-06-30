@@ -10,17 +10,33 @@ Expand the name of the chart.
 {{- end -}}
 
 {{/*
+ Selector labels
+*/}}
+{{- define "sr.selectorLabels" -}}
+app: apicurio-registry-operator
+app.kubernetes.io/name: {{ include "sr.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
  commons labels
 */}}
 {{- define "sr.labels" -}}
-app: apicurio-registry-operator
+{{ include "sr.selectorLabels" . }}
 app.kubernetes.io/component: operator
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-app.kubernetes.io/name: {{ include "sr.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/part-of: apicurio-registry
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+ Create a list of comma-separated namespaces the operators should watch.
+*/}}
+{{- define "sr.watchNamespaces" -}}
+{{- $namespacesList := .Values.operator.watchNamespaces | default (list) -}}
+{{- $returnList := append $namespacesList .Release.Namespace | sortAlpha | uniq -}}
+{{- join "," $returnList -}}
 {{- end -}}

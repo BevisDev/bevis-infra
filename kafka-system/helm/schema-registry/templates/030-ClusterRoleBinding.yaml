@@ -7,8 +7,8 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: apicurio-registry-operator-clusterrole
+  name: {{ include "sr.name" . }}-clusterrole
 subjects:
 - kind: ServiceAccount
-  name: apicurio-registry-operator
+  name: {{ include "sr.name" . }}-sa
   namespace: {{ .Release.Namespace }}

@@ -9,7 +9,7 @@ spec:
   replicas: {{ .Values.operator.replicas }}
   selector:
     matchLabels:
-      {{- include "sr.labels" . | nindent 6 }}
+      {{- include "sr.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
@@ -30,9 +30,13 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: APICURIO_OPERATOR_WATCHED_NAMESPACES
+        {{- if .Values.operator.watchNamespaces }}
+          values: {{ include "sr.watchNamespaces" . | quote }}
+        {{- else -}}
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['olm.targetNamespaces']
+        {{- end }}
         - name: QUARKUS_PROFILE
           value: prod
         - name: REGISTRY_APP_IMAGE
@@ -66,13 +70,10 @@ spec:
           initialDelaySeconds: 0
           periodSeconds: 10
           timeoutSeconds: 3
+        {{- with .Values.operator.resources }}
         resources:
-          limits:
-            cpu: 200m
-            memory: 500Mi
-          requests:
-            cpu: 100m
-            memory: 100Mi
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         startupProbe:
           failureThreshold: 14
           httpGet:
