@@ -31,7 +31,7 @@ spec:
               fieldPath: metadata.namespace
         - name: APICURIO_OPERATOR_WATCHED_NAMESPACES
         {{- if .Values.operator.watchNamespaces }}
-          values: {{ include "sr.watchNamespaces" . | quote }}
+          value: {{ include "sr.watchNamespaces" . | quote }}
         {{- else -}}
           valueFrom:
             fieldRef:

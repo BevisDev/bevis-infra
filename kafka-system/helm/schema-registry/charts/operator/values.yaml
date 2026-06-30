@@ -1,0 +1,35 @@
+nameOverride: 
+
+imageRegistry: quay.io
+imageRepository: apicurio
+imagePullSecrets:
+  - name: dockerhub-regcred
+imagePullPolicy: IfNotPresent
+
+operator:
+  replicas: 1
+  image:
+    name: apicurio-registry-3-operator
+    tag: "3.3.0"
+  watchNamespaces:
+    - kafka
+  resources:
+    limits:
+      cpu: 200m
+      memory: 500Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    
+app:
+  name: apicurio-registry
+  tag: "3.3.0"
+ui:
+  name: apicurio-registry-ui
+  tag: "3.3.0"
+gitops:
+  name: apicurio-registry-gitops-sync
+  tag: "3.3.0"
+
+serviceAccount:
+  name: "apicurio-registry-operator"
