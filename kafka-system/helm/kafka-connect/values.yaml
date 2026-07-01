@@ -62,6 +62,10 @@ connect:
     offset.storage.replication.factor: 3
     status.storage.replication.factor: 3
 
+    # docs: https://kafka.apache.org/42/configuration/configuration-providers/
+    config.providers: env
+    config.providers.env.class: org.apache.kafka.common.config.provider.EnvVarConfigProvider
+
     # default: org.apache.kafka.connect.json.JsonConverter
     # apicurio: io.apicurio.registry.utils.converter.AvroConverter
     key.converter: io.apicurio.registry.utils.converter.AvroConverter
@@ -88,11 +92,11 @@ connect:
     -Xms: 3g
     -Xmx: 3g
 
-  logging:
-    # only: inline | external
-    type: inline 
-    loggers:
-      connect.root.logger.level: INFO
+  # logging:
+  #   # only: inline | external
+  #   type: inline 
+  #   loggers:
+  #      rootLogger.level: INFO
 
   # Build a custom image with connector plugins (Debezium, JDBC, S3, ...).
   # Requires Strimzi Cluster Operator with Kaniko/Buildah support.
@@ -157,6 +161,8 @@ connect:
               name: minio
               key: secret-key
     pod:
+      imagePullSecrets:
+        - name: dockerhub-regcred
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -194,6 +200,9 @@ connectors:
       storage.class: io.confluent.connect.s3.storage.S3Storage
       format.class: io.confluent.connect.s3.format.json.JsonFormat
       partitioner.class: io.confluent.connect.storage.partitioner.TimeBasedPartitioner
-      path.format: 'year=YYYY/month=MM/day=dd/hour=HH'
+      partition.duration.ms: "3600000"
+      path.format: "YYYY-MM-dd/HH"
+      locale: "en-US"
+      timezone: "Asia/Ho_Chi_Minh"
       timestamp.extractor: Record
-      timestamp.field: timestamp
+      timestamp.field: ts_ms

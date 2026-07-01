@@ -6,6 +6,10 @@
 - Kafka Connect clusters deployed using the `KafkaConnect` resource
 - Connectors created using the `KafkaConnector` resource.
 
+# 1. Annotation
+
+- [Restart](https://github.com/strimzi/strimzi-kafka-operator/blob/main/documentation/modules/configuring/proc-manual-restart-connector.adoc)
+
 ## 2. Connector
 
 ### 2.1 S3/Minio
