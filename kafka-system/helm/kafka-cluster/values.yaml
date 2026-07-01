@@ -198,11 +198,16 @@ brokers:
 #
 # users: admin, ui (Kafka-UI), connect (Kafka-Connect)
 users:
+# ==========================
+# ======= ADMIN ============
+# ==========================
   - name: admin
     authentication:
       type: scram-sha-512
 
-  # user for Kafka-UI
+# ==========================
+# ======= UI ===============
+# ==========================
   - name: ui
     authentication:
       type: scram-sha-512
@@ -215,13 +220,10 @@ users:
           operations:
             - Describe
             - DescribeConfigs
-            - Alter
-            - AlterConfigs
-            - Create          # create topic
             - IdempotentWrite # pub message
           host: "*"
         
-        # --- Topics: full admin UI ---
+        # --- Topics  ---
         - resource:
             type: topic
             name: "*"
@@ -229,12 +231,8 @@ users:
           operations:
             - Read
             - Write
-            - Create
-            - Delete
-            - Alter
             - Describe
             - DescribeConfigs
-            - AlterConfigs
           host: "*"
           
         # --- Consumer groups ---
@@ -245,11 +243,12 @@ users:
           operations:
             - Read
             - Describe
-            - Delete
             - Alter  # reset offset
           host: "*"
 
-  # user for KafkaConnect
+# ==========================
+# ======= CONNECT ==========
+# ==========================
   - name: connect
     authentication:
       type: scram-sha-512
@@ -259,8 +258,8 @@ users:
         - resource:
             type: cluster
           operations:
+            - Create
             - Describe
-            - DescribeConfigs
             - IdempotentWrite # pub message
           host: "*"
           
@@ -274,8 +273,6 @@ users:
             - Write
             - Create
             - Describe
-            - Alter
-            - AlterConfigs
           host: "*"
           
         # --- Consumer groups ---
@@ -286,7 +283,6 @@ users:
           operations:
             - Read
             - Describe
-            - Alter
           host: "*"
 
 # KafkTopic
