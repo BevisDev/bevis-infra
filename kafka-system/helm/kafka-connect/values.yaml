@@ -2,9 +2,6 @@ clusterName: kafka-connect-cdc
 
 nameOverride: connect-cdc
 
-imagePullSecrets:
-  - name: dockerhub-regcred
-
 # Upstream Kafka cluster that Connect attaches to.
 kafka:
   name: dp-kafka
@@ -182,22 +179,41 @@ connect:
 #   connector.class: fully qualified connector class
 connectors:
   - name: s3-sink
+    # The state the connector should be in.
+    # paused | stopped | running
+    state: running
+
+    # annotation
+    # docs: https://strimzi.io/docs/operators/latest/deploying.html#proc-resetting-connector-offsets-str
+    # 
+    # should be run once
+    # kubectl annotate KafkaConnector <kafka_connector_name> strimzi.io/restart="true"
+
+    # NOTE: stops the connector before resetting offsets.
+    # annotations:
+    #   strimzi.io/connector-offsets: reset
+
+    # the automatic restart to each failed connector and its tasks
+    autoRestart:
+      enabled: true
+      maxRestarts: 10
+
     # the Class for the Kafka Connector. read README.md
     class: io.confluent.connect.s3.S3SinkConnector
     # The maximum number of tasks for the Kafka Connector.
     tasksMax: 10
     config:
+      topics.dir: cdc
       topics.regex: ^cdc\..*
       s3.bucket.name: dp-prod-raw
       s3.part.size: '5242880'
-      flush.size: '1000'
-      store.url: ${env:S3_ENDPOINT}
       aws.access.key.id: ${env:S3_ACCESS_KEY}
       aws.secret.access.key: ${env:S3_SECRET_KEY}
-      # write file format: https://minio-host/bucket/key -> required for Minio
-      s3.path.style.access: "true"
-      behavior.on.null.values: ignore
+      store.url: ${env:S3_ENDPOINT}
+      flush.size: "5"
+      rotate.interval.ms: "30000" # 5min
       storage.class: io.confluent.connect.s3.storage.S3Storage
+      # io.confluent.connect.s3.format.parquet.ParquetFormat
       format.class: io.confluent.connect.s3.format.json.JsonFormat
       partitioner.class: io.confluent.connect.storage.partitioner.TimeBasedPartitioner
       partition.duration.ms: "3600000"
@@ -206,3 +222,5 @@ connectors:
       timezone: "Asia/Ho_Chi_Minh"
       timestamp.extractor: Record
       timestamp.field: ts_ms
+      behavior.on.null.values: ignore
+      errors.tolerance: none

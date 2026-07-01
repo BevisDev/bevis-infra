@@ -1,5 +1,4 @@
-{{- if .Values.connect.enabled }}
-{{- if .Values.connect.useConnectorResources }}
+{{- if and .Values.connect.enabled .Values.connect.useConnectorResources }}
 {{- $root := . }}
 {{- range .Values.connectors }}
 ---
